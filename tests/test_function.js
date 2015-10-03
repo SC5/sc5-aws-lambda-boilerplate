@@ -1,6 +1,7 @@
-var expect = require('expect');
-var lambda = require('lambda-wrapper');
-var lambdaFunc = require('../src/index.js');
+var expect = require('expect'),
+    lambda = require('lambda-wrapper'),
+    lambdaFunc = require('../src/index.js');
+
 lambda.init(lambdaFunc);
 
 describe('lambda-skeleton', function() {
@@ -15,12 +16,12 @@ describe('lambda-skeleton', function() {
             done();
         });
     });
-    
+
     it('Returns an error if key1 is missing', function(done) {
         lambda.run({
             key2: 'foobar'
         }, function(error, response) {
-            expect(error).toMatch(/.*missing.*/);
+            expect(error.message).toMatch(/.*missing.*/);
             done();
         });
     });
