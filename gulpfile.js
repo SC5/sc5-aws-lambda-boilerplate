@@ -8,13 +8,10 @@ var del = require('del'),
     lambda = require('gulp-awslambda'),
     zip = require('gulp-zip'),
     lambdaenv = require('./lambdaenv.json'),
-    package = require('./package.json');
-
+    package = require('./package.json'),
 /* Configurations. Note that most of the configuration is stored in
 the task context. These are mainly for repeating configuration items */
-
-var buildname = package.name + '_' + package.version;
-buildname = buildname.replace(/[^A-Za-z0-9_-]/g,'_');
+    buildname = (package.name + '_' + package.version).replace(/[^A-Za-z0-9_-]/g, '_');
 
 /* Bump version number for package.json */
 // TODO Provide means for appending a patch id based on git commit id or md5 hash
@@ -46,7 +43,7 @@ gulp.task('build-copynodemodules', function() {
 gulp.task('build-ziptemp', function() {
     return gulp.src('temp/**/*')
         .pipe(zip(buildname + '.zip'))
-        .pipe(gulp.dest('.'));
+        .pipe(gulp.dest('dist/'));
 });
 
 gulp.task('buildzip', function() {
@@ -55,14 +52,13 @@ gulp.task('buildzip', function() {
 
 gulp.task('deployzip', function() {
     var lambdaparams = {
-        'FunctionName' : buildname,
-        'Description' : package.description,
-        'Role' : lambdaenv.Role
+        FunctionName: buildname,
+        Description: package.description,
+        Role: lambdaenv.Role
+    }, lambdaoptions = {
+        region: lambdaenv.Region
     };
-    var lambdaoptions = {
-        'region': lambdaenv.Region
-    };
-    return gulp.src(buildname + '.zip')
+    return gulp.src('dist/' + buildname + '.zip')
         .pipe(lambda(lambdaparams, lambdaoptions));
 });
 
@@ -85,7 +81,7 @@ gulp.task('test-run', function() {
 });
 
 //To check your package.json
-gulp.task('test-nsp', function (cb) {
+gulp.task('test-nsp', function(cb) {
     gulpNSP('./package.json', cb);
 });
 
@@ -106,5 +102,7 @@ gulp.task('test', function() {
 gulp.task('check', function() {
     return runSequence('test-run');
 });
+
+gulp.task('default', ['build', 'test']);
 
 gulp.task('default', ['build', 'test']);
